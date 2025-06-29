@@ -1,5 +1,7 @@
 // src/components/TodoList.tsx
 
+import React from "react";
+import styled from "styled-components";
 import TodoItem, { Todo, Category } from "./TodoItem";
 
 type TodoListProps = {
@@ -16,6 +18,21 @@ type TodoListProps = {
   deleteTodo: (id: number) => void; // Fonction pour supprimer une tâche
 };
 
+// Conteneur avec bordure bleue arrondie
+const TodoListContainer = styled.div`
+  margin-top: 20px;
+  padding: 12px;
+  border: 2px solid #2600ff;
+  border-radius: 12px;
+  background-color: #f9faff;
+`;
+
+const StyledUl = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+`;
+
 export default function TodoList({
   todos,
   editingId,
@@ -25,23 +42,24 @@ export default function TodoList({
   deleteTodo,
 }: TodoListProps) {
   return (
-    <ul>
-      {/* On affiche la liste des tâches avec le composant TodoItem */}
-      {todos.length === 0 ? (
-        <li>Aucune tâche à afficher.</li>
-      ) : (
-        todos.map((todo) => (
-          <TodoItem
-            key={todo.id}
-            todo={todo}
-            editingId={editingId}
-            setEditingId={setEditingId}
-            saveEditedTodo={saveEditedTodo}
-            toggleTodo={toggleTodo}
-            deleteTodo={deleteTodo}
-          />
-        ))
-      )}
-    </ul>
+    <TodoListContainer>
+      <StyledUl>
+        {todos.length === 0 ? (
+          <li>Aucune tâche à afficher.</li>
+        ) : (
+          todos.map((todo) => (
+            <TodoItem
+              key={todo.id}
+              todo={todo}
+              editingId={editingId}
+              setEditingId={setEditingId}
+              saveEditedTodo={saveEditedTodo}
+              toggleTodo={toggleTodo}
+              deleteTodo={deleteTodo}
+            />
+          ))
+        )}
+      </StyledUl>
+    </TodoListContainer>
   );
 }

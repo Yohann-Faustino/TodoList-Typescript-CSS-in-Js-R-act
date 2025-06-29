@@ -6,6 +6,7 @@ import FilterControls from "../components/FilterControls";
 import TodoItem, { Todo, Category } from "../components/TodoItem";
 import Osaka from "../src/assets/Osaka.avif";
 
+// on Définis le Background
 const Background = styled.div`
   min-height: 100vh;
   background-image: url(${Osaka});
@@ -89,7 +90,7 @@ export default function TodoApp() {
     setTodos((prev) => prev.filter((todo) => todo.id !== id));
   };
 
-  // Fonction pour sauvegarder une tâche modifiée (édition)
+  // Fonction pour sauvegarder une tâche modifiée
   const saveEditedTodo = (
     id: number,
     text: string,
@@ -121,30 +122,32 @@ export default function TodoApp() {
 
   return (
     <Background>
-      <Container>
-        <Title>Ma To-do list</Title>
+      <main>
+        <Container>
+          <Title>Ma To-do list</Title>
 
-        {/* Formulaire d'ajout de tâche */}
-        <TodoForm addTodo={addTodo} />
+          {/* Formulaire d'ajout de tâche */}
+          <TodoForm addTodo={addTodo} />
 
-        {/* Contrôles des filtres statut et catégorie */}
-        <FilterControls
-          filter={filter}
-          setFilter={setFilter}
-          categoryFilter={categoryFilter}
-          setCategoryFilter={setCategoryFilter}
-        />
+          {/* Contrôles des filtres statut et catégorie */}
+          <FilterControls
+            filter={filter}
+            setFilter={setFilter}
+            categoryFilter={categoryFilter}
+            setCategoryFilter={setCategoryFilter}
+          />
 
-        {/* Liste des tâches filtrées, avec gestion édition, suppression, etc */}
-        <TodoList
-          todos={filteredTodos}
-          editingId={editingId}
-          setEditingId={setEditingId}
-          saveEditedTodo={saveEditedTodo}
-          toggleTodo={toggleTodo}
-          deleteTodo={deleteTodo}
-        />
-      </Container>
+          {/* Liste des tâches filtrées, avec gestion édition, suppression, etc */}
+          <TodoList
+            todos={filteredTodos}
+            editingId={editingId}
+            setEditingId={setEditingId}
+            saveEditedTodo={saveEditedTodo}
+            toggleTodo={toggleTodo}
+            deleteTodo={deleteTodo}
+          />
+        </Container>
+      </main>
     </Background>
   );
 }

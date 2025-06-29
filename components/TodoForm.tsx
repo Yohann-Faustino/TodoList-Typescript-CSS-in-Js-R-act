@@ -26,6 +26,7 @@ const Row = styled.div`
   margin-bottom: 8px;
 `;
 
+// Personnalisation des dates
 const DateInput = styled.input`
   flex: 1;
   padding: 8px;
@@ -33,6 +34,7 @@ const DateInput = styled.input`
   border: 1px solid #ccc;
 `;
 
+// Personnalisation du border
 const Select = styled.select`
   flex: 1;
   padding: 8px;
@@ -60,8 +62,10 @@ interface TodoFormProps {
 export default function TodoForm({ addTodo }: TodoFormProps) {
   // Nouvelle tâche
   const [newTodo, setNewTodo] = useState("");
+
   // Ajout du champ date à la création
   const [newDueDate, setNewDueDate] = useState("");
+
   // Champ catégorie
   const [newCategory, setNewCategory] = useState<Category | "">("");
 

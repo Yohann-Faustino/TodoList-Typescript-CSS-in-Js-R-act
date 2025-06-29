@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-// Enum pour les catégories (tu peux l'importer depuis un fichier commun si tu veux)
+// Enum pour les catégories
 export enum Category {
   Travail = "travail",
   Personnel = "personnel",
@@ -17,6 +17,7 @@ export type Todo = {
   category?: Category; // catégorie
 };
 
+// Props
 type TodoItemProps = {
   todo: Todo;
   editingId: number | null;

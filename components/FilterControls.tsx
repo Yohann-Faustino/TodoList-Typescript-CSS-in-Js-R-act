@@ -10,40 +10,66 @@ interface FilterControlsProps {
   setCategoryFilter: (category: Category | "all") => void;
 }
 
-// Conteneur principal avec espacement
-const ControlsContainer = styled.div`
+// Personnalisation du container des filtres
+const ControlsContainer = styled.section`
   margin-top: 20px;
   text-align: center;
 `;
 
-// Bouton de filtre stylisé
+// Personnalisation h2
+const Title = styled.h2`
+  color: #2600ff; /* Bleu */
+  margin-bottom: 15px;
+`;
+
+// Personnalisation du fieldset de l'état des tâches
+const FilterFieldset = styled.fieldset`
+  border: 2px solid #2600ff;
+  border-radius: 8px;
+  padding: 10px 15px;
+  margin-bottom: 20px;
+`;
+
+// Personnalisation du h3 Etat
+const Legend = styled.legend`
+  font-weight: bold;
+  color: #2600ff;
+  padding: 0 8px;
+`;
+
+// Personnalisation du bouton de soumission des tâches
 const FilterButton = styled.button<{ active: boolean }>`
   margin: 0 5px;
   padding: 6px 12px;
   border: none;
-  background-color: ${({ active }) => (active ? "#333" : "#ccc")};
+  background-color: ${({ active }) => (active ? "#2600ff" : "#ccc")};
   color: ${({ active }) => (active ? "#fff" : "#000")};
   cursor: pointer;
   border-radius: 4px;
+  transition: background-color 0.3s;
 
-  &:hover {
-    background-color: ${({ active }) => (active ? "#555" : "#bbb")};
+  &:hover,
+  &:focus-visible {
+    background-color: ${({ active }) => (active ? "#3f44ff" : "#bbb")};
+    outline: none;
   }
 `;
 
-// Sélecteur de catégorie stylisé
+// Personnalisation du h3 Catégorie
+const Label = styled.label`
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #2600ff;
+`;
+
+// Personnalisation du select des catégories
 const Select = styled.select`
   margin-top: 10px;
   padding: 6px 10px;
   border-radius: 4px;
   border: 1px solid #ccc;
-`;
-
-const Label = styled.label`
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: blue;
+  min-width: 100px;
 `;
 
 export default function FilterControls({
@@ -53,32 +79,40 @@ export default function FilterControls({
   setCategoryFilter,
 }: FilterControlsProps) {
   return (
-    <ControlsContainer>
-      {/* Filtres par statut */}
-      <div>
-        <Label htmlFor="Etats">Etats :</Label>
+    <ControlsContainer aria-label="Filtres des tâches">
+      <Title>Filtres des tâches</Title>
+
+      {/* Filtre par état dans un fieldset */}
+      <FilterFieldset>
+        <Legend>État des tâches</Legend>
         <FilterButton
           active={filter === "all"}
           onClick={() => setFilter("all")}
+          aria-pressed={filter === "all"}
+          type="button"
         >
           Tous
         </FilterButton>
         <FilterButton
           active={filter === "active"}
           onClick={() => setFilter("active")}
+          aria-pressed={filter === "active"}
+          type="button"
         >
           Actifs
         </FilterButton>
         <FilterButton
           active={filter === "completed"}
           onClick={() => setFilter("completed")}
+          aria-pressed={filter === "completed"}
+          type="button"
         >
           Terminés
         </FilterButton>
-      </div>
+      </FilterFieldset>
 
       {/* Filtre par catégorie */}
-      <div style={{ marginTop: "15px" }}>
+      <div>
         <Label htmlFor="category">Catégorie :</Label>
         <Select
           id="category"
