@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
+import styled from "styled-components";
 
-// Enum pour les catégories
+// Enumération des catégories disponibles pour une tâche
 export enum Category {
   Travail = "travail",
   Personnel = "personnel",
@@ -8,16 +9,16 @@ export enum Category {
   Autre = "autre",
 }
 
-// Type pour une tâche Todo
+// Définition d'un type Todo
 export type Todo = {
   id: number;
   text: string;
-  completed: boolean; // Statut : terminée ou non
-  dueDate?: string; // date d’échéance
-  category?: Category; // catégorie
+  completed: boolean;
+  dueDate?: string;
+  category?: Category;
 };
 
-// Props
+// Définition des props attendues par le composant TodoItem
 type TodoItemProps = {
   todo: Todo;
   editingId: number | null;
@@ -32,6 +33,64 @@ type TodoItemProps = {
   deleteTodo: (id: number) => void;
 };
 
+// Style de la carte représentant une tâche
+const Card = styled.li`
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+`;
+
+// Champ texte stylisé
+const StyledInput = styled.input`
+  width: 80%;
+  max-width: 400px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+`;
+
+// Menu déroulant (select) stylisé pour la catégorie
+const StyledSelect = styled.select`
+  width: 80%;
+  max-width: 400px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+`;
+
+// Conteneur des boutons
+const Actions = styled.div`
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 8px;
+`;
+
+// Texte de la tâche, barré si complétée
+const InfoText = styled.span<{ completed?: boolean }>`
+  cursor: pointer;
+  text-decoration: ${({ completed }) => (completed ? "line-through" : "none")};
+`;
+
+// Date limite avec style rouge si en retard
+const DueDate = styled.small<{ isLate: boolean }>`
+  color: ${({ isLate }) => (isLate ? "red" : "#333")};
+  font-style: italic;
+`;
+
+// Affichage de la catégorie
+const CategoryText = styled.small`
+  color: #555;
+`;
+
 export default function TodoItem({
   todo,
   editingId,
@@ -40,14 +99,14 @@ export default function TodoItem({
   toggleTodo,
   deleteTodo,
 }: TodoItemProps) {
-  // Etats locaux pour l’édition
+  // États locaux pour l'édition
   const [editedText, setEditedText] = useState(todo.text);
   const [editedDueDate, setEditedDueDate] = useState(todo.dueDate || "");
   const [editedCategory, setEditedCategory] = useState<Category | "">(
     todo.category || ""
   );
 
-  // Quand on entre en mode édition, on initialise les champs avec les valeurs de la tâche
+  // Si on passe en mode édition, on met à jour les champs
   useEffect(() => {
     if (editingId === todo.id) {
       setEditedText(todo.text);
@@ -56,25 +115,27 @@ export default function TodoItem({
     }
   }, [editingId, todo]);
 
-  // Fonction pour valider l’édition quand on clique sur ✅ ou appuie sur Enter
+  // Sauvegarde la tâche modifiée
   const handleSave = () => {
-    if (editedText.trim() === "") return; // pas de texte vide
+    if (editedText.trim() === "") return;
     saveEditedTodo(
       todo.id,
       editedText.trim(),
       editedDueDate || undefined,
       editedCategory === "" ? undefined : editedCategory
     );
-    setEditingId(null);
+    setEditingId(null); // Sort du mode édition
   };
 
-  // Affichage de la tâche ou formulaire d’édition selon le mode
+  const isLate =
+    todo.dueDate && new Date(todo.dueDate) < new Date() && !todo.completed;
+
   return (
-    <li>
+    <Card>
       {editingId === todo.id ? (
+        // MODE EDDITION DE LA CARD
         <>
-          {/* Champ texte */}
-          <input
+          <StyledInput
             type="text"
             value={editedText}
             onChange={(e) => setEditedText(e.target.value)}
@@ -82,16 +143,14 @@ export default function TodoItem({
             autoFocus
           />
 
-          {/* Champ date d’échéance */}
-          <input
+          <StyledInput
             type="date"
             value={editedDueDate}
             onChange={(e) => setEditedDueDate(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSave()}
           />
 
-          {/* Sélecteur de catégorie */}
-          <select
+          <StyledSelect
             value={editedCategory}
             onChange={(e) => setEditedCategory(e.target.value as Category | "")}
           >
@@ -100,53 +159,37 @@ export default function TodoItem({
             <option value={Category.Personnel}>Personnel</option>
             <option value={Category.Voyages}>Voyages</option>
             <option value={Category.Autre}>Autre</option>
-          </select>
+          </StyledSelect>
 
-          {/* Boutons valider / annuler */}
-          <button onClick={handleSave}>✅</button>
-          <button onClick={() => setEditingId(null)}>❌</button>
+          <Actions>
+            <button onClick={handleSave}>✅</button>
+            <button onClick={() => setEditingId(null)}>❌</button>
+          </Actions>
         </>
       ) : (
+        // MODE AFFICHAGE DE LA CARD
         <>
-          {/* Texte cliquable pour toggle "terminé" */}
-          <span
+          <InfoText
+            completed={todo.completed}
             onClick={() => toggleTodo(todo.id)}
-            style={{
-              textDecoration: todo.completed ? "line-through" : "none",
-              cursor: "pointer",
-            }}
           >
             {todo.text}
-          </span>
+          </InfoText>
 
-          {/* Affichage date d’échéance, en rouge si passée */}
           {todo.dueDate && (
-            <small
-              style={{
-                marginLeft: 10,
-                fontStyle: "italic",
-                color:
-                  new Date(todo.dueDate) < new Date() && !todo.completed
-                    ? "red"
-                    : "inherit",
-              }}
-            >
+            <DueDate isLate={isLate}>
               📅 {new Date(todo.dueDate).toLocaleDateString()}
-            </small>
+            </DueDate>
           )}
 
-          {/* Affichage catégorie */}
-          {todo.category && (
-            <small style={{ marginLeft: 10, color: "#555" }}>
-              📂 {todo.category}
-            </small>
-          )}
+          {todo.category && <CategoryText>📂 {todo.category}</CategoryText>}
 
-          {/* Boutons éditer / supprimer */}
-          <button onClick={() => setEditingId(todo.id)}>✏️</button>
-          <button onClick={() => deleteTodo(todo.id)}>❌</button>
+          <Actions>
+            <button onClick={() => setEditingId(todo.id)}>✏️</button>
+            <button onClick={() => deleteTodo(todo.id)}>🗑️</button>
+          </Actions>
         </>
       )}
-    </li>
+    </Card>
   );
 }
