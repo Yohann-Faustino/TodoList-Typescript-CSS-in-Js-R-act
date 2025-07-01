@@ -71,7 +71,7 @@ export default function TodoApp() {
       text,
       completed: false,
       dueDate,
-      category: category || "autre",
+      category: category || Category.Autre,
     };
     setTodos((prev) => [...prev, newTodo]);
   };
@@ -126,10 +126,8 @@ export default function TodoApp() {
         <Container>
           <Title>Ma To-do list</Title>
 
-          {/* Formulaire d'ajout de tâche */}
           <TodoForm addTodo={addTodo} />
 
-          {/* Contrôles des filtres statut et catégorie */}
           <FilterControls
             filter={filter}
             setFilter={setFilter}
@@ -137,7 +135,6 @@ export default function TodoApp() {
             setCategoryFilter={setCategoryFilter}
           />
 
-          {/* Liste des tâches filtrées, avec gestion édition, suppression, etc */}
           <TodoList
             todos={filteredTodos}
             editingId={editingId}
@@ -145,6 +142,7 @@ export default function TodoApp() {
             saveEditedTodo={saveEditedTodo}
             toggleTodo={toggleTodo}
             deleteTodo={deleteTodo}
+            setTodos={setTodos}
           />
         </Container>
       </main>

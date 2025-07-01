@@ -21,7 +21,7 @@ export type Todo = {
 // Définition des props attendues par le composant TodoItem
 type TodoItemProps = {
   todo: Todo;
-  editingId: number | null;
+  isEditing: boolean;
   setEditingId: (id: number | null) => void;
   saveEditedTodo: (
     id: number,
@@ -91,9 +91,10 @@ const CategoryText = styled.small`
   color: #555;
 `;
 
+// Affiche et permet d’éditer une tâche individuelle dans la liste des tâches
 export default function TodoItem({
   todo,
-  editingId,
+  isEditing,
   setEditingId,
   saveEditedTodo,
   toggleTodo,
@@ -108,12 +109,13 @@ export default function TodoItem({
 
   // Si on passe en mode édition, on met à jour les champs
   useEffect(() => {
-    if (editingId === todo.id) {
+    if (isEditing) {
+      // isEditing est un booléen
       setEditedText(todo.text);
       setEditedDueDate(todo.dueDate || "");
       setEditedCategory(todo.category || "");
     }
-  }, [editingId, todo]);
+  }, [isEditing, todo]);
 
   // Sauvegarde la tâche modifiée
   const handleSave = () => {
@@ -127,12 +129,16 @@ export default function TodoItem({
     setEditingId(null); // Sort du mode édition
   };
 
-  const isLate =
-    todo.dueDate && new Date(todo.dueDate) < new Date() && !todo.completed;
+  // Indique si la tâche est en retard
+  const isLate = !!(
+    todo.dueDate &&
+    new Date(todo.dueDate) < new Date() &&
+    !todo.completed
+  );
 
   return (
     <Card>
-      {editingId === todo.id ? (
+      {isEditing ? (
         // MODE EDDITION DE LA CARD
         <>
           <StyledInput
