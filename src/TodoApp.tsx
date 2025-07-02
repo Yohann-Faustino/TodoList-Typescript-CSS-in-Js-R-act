@@ -1,96 +1,100 @@
-import React, { useState, useEffect } from "react";
-import styled from "styled-components";
-import TodoList from "../components/TodoList";
-import TodoForm from "../components/TodoForm";
-import FilterControls from "../components/FilterControls";
-import TodoItem, { Todo, Category } from "../components/TodoItem";
-import Osaka from "../src/assets/Osaka.avif";
+// src/components/TodoApp.tsx
 
-// on Définis le Background
-const Background = styled.div`
+import { useState, useEffect } from "react";
+import styled from "styled-components";
+import TodoForm from "../components/TodoForm";
+import TodoList from "../components/TodoList";
+import { Todo, Category } from "../components/TodoItem";
+
+// Fond d'écran "Osaka" sur toute la page
+const AppContainer = styled.div`
   min-height: 100vh;
-  background-image: url(${Osaka});
+  background-image: url("/Osaka.avif");
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 40px 20px;
-`;
-
-// Container principal
-const Container = styled.div`
-  max-width: 400px;
-  margin: 0 auto;
-  font-family: Arial, sans-serif;
-  background-color: rgba(255, 255, 255, 0.9);
-  border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
-// Titre principal
+// Titre
 const Title = styled.h1`
-  text-align: center;
+  background-color: #ffffffcc;
   color: #2600ff;
+  display: table;
+  margin: 0 auto 20px auto;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1.8rem;
+  text-align: center;
+  user-select: none;
+`;
+
+// Barre du haut avec ajout (gauche) + filtre (droite)
+const TopBar = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+`;
+
+// Bloc à gauche : ajout de tâches
+const FormContainer = styled.div`
+  background-color: #e0f7fa;
+  padding: 12px;
+  border-radius: 8px;
+  min-width: 300px;
+`;
+
+// Bloc à droite : filtre des tâches
+const FilterContainer = styled.div`
+  background-color: #ffe0b2;
+  padding: 12px;
+  border-radius: 8px;
+  min-width: 200px;
+`;
+
+// Container pour la liste des tâches
+const TaskListWrapper = styled.div`
+  margin-top: 20px;
 `;
 
 export default function TodoApp() {
-  // État des tâches, initialisé depuis localStorage si existant
-  const [todos, setTodos] = useState<Todo[]>(() => {
-    const saved = localStorage.getItem("todos");
-    if (saved) {
-      try {
-        return JSON.parse(saved) as Todo[];
-      } catch (e) {
-        console.error("Erreur lors du parsing des tâches sauvegardées :", e);
-      }
-    }
-    return [];
-  });
+  // État principal des tâches
+  const [todos, setTodos] = useState<Todo[]>([]);
 
-  // État du filtre (all, active, completed)
-  const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
-
-  // Filtre par catégorie, ou "all"
-  const [categoryFilter, setCategoryFilter] = useState<Category | "all">("all");
-
-  // Id de la tâche en cours d'édition (null si aucune)
+  // Gestion de l'édition
   const [editingId, setEditingId] = useState<number | null>(null);
 
-  // Sauvegarde automatique des todos dans localStorage à chaque modification
+  // Filtre sélectionné par catégorie
+  const [filter, setFilter] = useState<"all" | Category>("all");
+
+  // Charger les tâches depuis localStorage une seule fois
+  useEffect(() => {
+    const stored = localStorage.getItem("todos");
+    if (stored) {
+      setTodos(JSON.parse(stored));
+    }
+  }, []);
+
+  // Sauvegarder les tâches à chaque changement
   useEffect(() => {
     localStorage.setItem("todos", JSON.stringify(todos));
   }, [todos]);
 
-  // Fonction pour ajouter une nouvelle tâche, passée au composant TodoForm
+  // Ajouter une nouvelle tâche
   const addTodo = (text: string, dueDate?: string, category?: Category) => {
     const newTodo: Todo = {
-      id: Date.now(), // id simple avec timestamp
+      id: Date.now(),
       text,
       completed: false,
       dueDate,
-      category: category || Category.Autre,
+      category,
     };
-    setTodos((prev) => [...prev, newTodo]);
+    setTodos([newTodo, ...todos]);
   };
 
-  // Fonction pour basculer le statut completed d'une tâche
-  const toggleTodo = (id: number) => {
-    setTodos((prev) =>
-      prev.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
-  };
-
-  // Fonction pour supprimer une tâche par id
-  const deleteTodo = (id: number) => {
-    setTodos((prev) => prev.filter((todo) => todo.id !== id));
-  };
-
-  // Fonction pour sauvegarder une tâche modifiée
+  // Sauvegarder une tâche modifiée
   const saveEditedTodo = (
     id: number,
     text: string,
@@ -102,50 +106,72 @@ export default function TodoApp() {
         todo.id === id ? { ...todo, text, dueDate, category } : todo
       )
     );
-    setEditingId(null); // Sort du mode édition
+    setEditingId(null);
   };
 
-  // Filtrage des tâches selon filter (statut) et categoryFilter (catégorie)
-  const filteredTodos = todos.filter((todo) => {
-    const statusMatch =
-      filter === "all"
-        ? true
-        : filter === "active"
-          ? !todo.completed
-          : todo.completed;
+  // Marquer comme complétée ou non
+  const toggleTodo = (id: number) => {
+    setTodos((prev) =>
+      prev.map((todo) =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      )
+    );
+  };
 
-    const categoryMatch =
-      categoryFilter === "all" ? true : todo.category === categoryFilter;
+  // Supprimer une tâche
+  const deleteTodo = (id: number) => {
+    setTodos((prev) => prev.filter((todo) => todo.id !== id));
+  };
 
-    return statusMatch && categoryMatch;
-  });
+  // Filtrer les tâches selon la catégorie
+  const filteredTodos =
+    filter === "all" ? todos : todos.filter((todo) => todo.category === filter);
+
+  // Gérer le changement de filtre
+  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilter(e.target.value as "all" | Category);
+  };
 
   return (
-    <Background>
-      <main>
-        <Container>
-          <Title>Ma To-do list</Title>
-
+    <AppContainer>
+      <Title>⛩️ Bienvenu sur ma To do List 🍙</Title>
+      {/* Bloc du haut : Formulaire + filtre */}
+      <TopBar>
+        {/* Bloc de gauche : ajout de tâche */}
+        <FormContainer>
           <TodoForm addTodo={addTodo} />
+        </FormContainer>
 
-          <FilterControls
-            filter={filter}
-            setFilter={setFilter}
-            categoryFilter={categoryFilter}
-            setCategoryFilter={setCategoryFilter}
-          />
+        {/* Bloc de droite : filtre par catégorie */}
+        <FilterContainer>
+          <label htmlFor="filter-select">Filtrer par catégorie :</label>
+          <select
+            id="filter-select"
+            value={filter}
+            onChange={handleFilterChange}
+            style={{ marginTop: "8px", padding: "8px", width: "100%" }}
+          >
+            <option value="all">Toutes les tâches</option>
+            <option value="travail">Travail</option>
+            <option value="personnel">Personnel</option>
+            <option value="voyages">Voyages</option>
+            <option value="autre">Autre</option>
+          </select>
+        </FilterContainer>
+      </TopBar>
 
-          <TodoList
-            todos={filteredTodos}
-            editingId={editingId}
-            setEditingId={setEditingId}
-            saveEditedTodo={saveEditedTodo}
-            toggleTodo={toggleTodo}
-            deleteTodo={deleteTodo}
-            setTodos={setTodos}
-          />
-        </Container>
-      </main>
-    </Background>
+      {/* Bloc du bas : liste des tâches */}
+      <TaskListWrapper>
+        <TodoList
+          todos={filteredTodos}
+          editingId={editingId}
+          setEditingId={setEditingId}
+          saveEditedTodo={saveEditedTodo}
+          toggleTodo={toggleTodo}
+          deleteTodo={deleteTodo}
+          setTodos={setTodos}
+        />
+      </TaskListWrapper>
+    </AppContainer>
   );
 }

@@ -51,7 +51,6 @@ const Card = styled.li`
 // Champ texte stylisé
 const StyledInput = styled.input`
   width: 80%;
-  max-width: 400px;
   padding: 8px;
   border-radius: 6px;
   border: 1px solid #ccc;
@@ -60,7 +59,6 @@ const StyledInput = styled.input`
 // Menu déroulant (select) stylisé pour la catégorie
 const StyledSelect = styled.select`
   width: 80%;
-  max-width: 400px;
   padding: 8px;
   border-radius: 6px;
   border: 1px solid #ccc;
