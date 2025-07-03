@@ -1,9 +1,8 @@
-// src/components/TodoApp.tsx
-
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import TodoForm from "../components/TodoForm";
 import TodoList from "../components/TodoList";
+import FilterControls from "../components/FilterControls";
 import { Todo, Category } from "../components/TodoItem";
 
 // Fond d'écran "Osaka" sur toute la page
@@ -15,7 +14,7 @@ const AppContainer = styled.div`
   padding: 20px;
 `;
 
-// Titre
+// Titre principal
 const Title = styled.h1`
   background-color: #ffffffcc;
   color: #2600ff;
@@ -29,47 +28,52 @@ const Title = styled.h1`
   user-select: none;
 `;
 
-// Barre du haut avec ajout (gauche) + filtre (droite)
+// Barre du haut : ajout à gauche + filtres à droite (responsive)
 const TopBar = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  align-items: stretch;
   gap: 20px;
   flex-wrap: wrap;
 `;
 
-// Bloc à gauche : ajout de tâches
+// Bloc gauche pour ajout de tâche
 const FormContainer = styled.div`
-  background-color: #e0f7fa;
-  padding: 12px;
+  background-color: #ffffffcc;
   border-radius: 8px;
   min-width: 300px;
 `;
 
-// Bloc à droite : filtre des tâches
+// Bloc droit pour filtres
 const FilterContainer = styled.div`
-  background-color: #ffe0b2;
+  background-color: #ffffffcc;
   padding: 12px;
   border-radius: 8px;
-  min-width: 200px;
+  min-width: 250px;
 `;
 
-// Container pour la liste des tâches
+// Wrapper pour la liste des tâches
 const TaskListWrapper = styled.div`
   margin-top: 20px;
 `;
 
 export default function TodoApp() {
-  // État principal des tâches
+  // État des tâches
   const [todos, setTodos] = useState<Todo[]>([]);
 
-  // Gestion de l'édition
+  // ID de la tâche en cours d'édition (null si aucune)
   const [editingId, setEditingId] = useState<number | null>(null);
 
-  // Filtre sélectionné par catégorie
+  // Filtre par catégorie ("all" = toutes)
   const [filter, setFilter] = useState<"all" | Category>("all");
 
-  // Charger les tâches depuis localStorage une seule fois
+  // Filtre par état ("all" = toutes)
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "active" | "completed"
+  >("all");
+
+  // Charger les tâches depuis localStorage au montage
   useEffect(() => {
     const stored = localStorage.getItem("todos");
     if (stored) {
@@ -77,7 +81,7 @@ export default function TodoApp() {
     }
   }, []);
 
-  // Sauvegarder les tâches à chaque changement
+  // Sauvegarder les tâches dans localStorage à chaque modification
   useEffect(() => {
     localStorage.setItem("todos", JSON.stringify(todos));
   }, [todos]);
@@ -109,7 +113,7 @@ export default function TodoApp() {
     setEditingId(null);
   };
 
-  // Marquer comme complétée ou non
+  // Basculer l'état complété d'une tâche
   const toggleTodo = (id: number) => {
     setTodos((prev) =>
       prev.map((todo) =>
@@ -123,44 +127,39 @@ export default function TodoApp() {
     setTodos((prev) => prev.filter((todo) => todo.id !== id));
   };
 
-  // Filtrer les tâches selon la catégorie
-  const filteredTodos =
-    filter === "all" ? todos : todos.filter((todo) => todo.category === filter);
-
-  // Gérer le changement de filtre
-  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFilter(e.target.value as "all" | Category);
-  };
+  // Filtrer les tâches selon catégorie ET état
+  const filteredTodos = todos.filter((todo) => {
+    const matchCategory = filter === "all" ? true : todo.category === filter;
+    const matchStatus =
+      statusFilter === "all"
+        ? true
+        : statusFilter === "active"
+          ? !todo.completed
+          : todo.completed;
+    return matchCategory && matchStatus;
+  });
 
   return (
     <AppContainer>
       <Title>⛩️ Bienvenu sur ma To do List 🍙</Title>
-      {/* Bloc du haut : Formulaire + filtre */}
       <TopBar>
-        {/* Bloc de gauche : ajout de tâche */}
+        {/* Formulaire d'ajout */}
         <FormContainer>
           <TodoForm addTodo={addTodo} />
         </FormContainer>
 
-        {/* Bloc de droite : filtre par catégorie */}
+        {/* Filtres catégorie + état */}
         <FilterContainer>
-          <label htmlFor="filter-select">Filtrer par catégorie :</label>
-          <select
-            id="filter-select"
-            value={filter}
-            onChange={handleFilterChange}
-            style={{ marginTop: "8px", padding: "8px", width: "100%" }}
-          >
-            <option value="all">Toutes les tâches</option>
-            <option value="travail">Travail</option>
-            <option value="personnel">Personnel</option>
-            <option value="voyages">Voyages</option>
-            <option value="autre">Autre</option>
-          </select>
+          <FilterControls
+            filter={filter}
+            setFilter={setFilter}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+          />
         </FilterContainer>
       </TopBar>
 
-      {/* Bloc du bas : liste des tâches */}
+      {/* Liste des tâches filtrées */}
       <TaskListWrapper>
         <TodoList
           todos={filteredTodos}

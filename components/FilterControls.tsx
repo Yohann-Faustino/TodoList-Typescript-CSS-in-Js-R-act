@@ -2,131 +2,125 @@ import React from "react";
 import styled from "styled-components";
 import { Category } from "./TodoItem";
 
-// Types des props attendues
 interface FilterControlsProps {
-  filter: "all" | "active" | "completed";
-  setFilter: (filter: "all" | "active" | "completed") => void;
-  categoryFilter: Category | "all";
-  setCategoryFilter: (category: Category | "all") => void;
+  filter: "all" | Category;
+  setFilter: (filter: "all" | Category) => void;
+  statusFilter: "all" | "active" | "completed";
+  setStatusFilter: (filter: "all" | "active" | "completed") => void;
 }
 
-// Personnalisation du container des filtres
 const ControlsContainer = styled.section`
-  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+`;
+
+const FilterGroup = styled.div`
+  min-width: 140px;
+`;
+
+const Title = styled.h3`
+  color: #2600ff;
+  margin-bottom: 12px;
+  font-weight: 700;
+  user-select: none;
   text-align: center;
 `;
 
-// Personnalisation h2
-const Title = styled.h2`
-  color: #2600ff; /* Bleu */
-  margin-bottom: 15px;
+const RadioGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 `;
 
-// Personnalisation du fieldset de l'état des tâches
-const FilterFieldset = styled.fieldset`
-  border: 2px solid #2600ff;
-  border-radius: 8px;
-  padding: 10px 15px;
-  margin-bottom: 20px;
-`;
-
-// Personnalisation du h3 Etat
-const Legend = styled.legend`
-  font-weight: bold;
-  color: #2600ff;
-  padding: 0 8px;
-`;
-
-// Personnalisation du bouton de soumission des tâches
-const FilterButton = styled.button<{ active: boolean }>`
-  margin: 0 5px;
-  padding: 6px 12px;
-  border: none;
-  background-color: ${({ active }) => (active ? "#2600ff" : "#ccc")};
-  color: ${({ active }) => (active ? "#fff" : "#000")};
+const RadioLabel = styled.label<{ checked: boolean }>`
   cursor: pointer;
-  border-radius: 4px;
+  font-weight: ${({ checked }) => (checked ? "700" : "400")};
+  color: ${({ checked }) => (checked ? "#2600ff" : "#555")};
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const HiddenRadio = styled.input.attrs({ type: "radio" })`
+  opacity: 0;
+  position: absolute;
+  width: 0;
+  height: 0;
+`;
+
+const StyledRadio = styled.span<{ checked: boolean }>`
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #2600ff;
+  background-color: ${({ checked }) => (checked ? "#2600ff" : "transparent")};
+  display: inline-block;
   transition: background-color 0.3s;
-
-  &:hover,
-  &:focus-visible {
-    background-color: ${({ active }) => (active ? "#3f44ff" : "#bbb")};
-    outline: none;
-  }
-`;
-
-// Personnalisation du h3 Catégorie
-const Label = styled.label`
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: #2600ff;
-`;
-
-// Personnalisation du select des catégories
-const Select = styled.select`
-  margin-top: 10px;
-  padding: 6px 10px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  min-width: 100px;
 `;
 
 export default function FilterControls({
   filter,
   setFilter,
-  categoryFilter,
-  setCategoryFilter,
+  statusFilter,
+  setStatusFilter,
 }: FilterControlsProps) {
   return (
     <ControlsContainer aria-label="Filtres des tâches">
-      <Title>Filtres des tâches</Title>
+      <FilterGroup aria-labelledby="category-filter-title">
+        <Title id="category-filter-title">Catégorie</Title>
+        <RadioGroup role="radiogroup" aria-label="Filtrer par catégorie">
+          {[
+            { value: "all", label: "Toutes" },
+            { value: "travail", label: "Travail" },
+            { value: "personnel", label: "Personnel" },
+            { value: "voyages", label: "Voyages" },
+            { value: "autre", label: "Autre" },
+          ].map(({ value, label }) => {
+            const checked = filter === value;
+            return (
+              <RadioLabel key={value} checked={checked}>
+                <HiddenRadio
+                  name="categoryFilter"
+                  value={value}
+                  checked={checked}
+                  onChange={() => setFilter(value as "all" | Category)}
+                />
+                <StyledRadio checked={checked} />
+                {label}
+              </RadioLabel>
+            );
+          })}
+        </RadioGroup>
+      </FilterGroup>
 
-      {/* Filtre par état dans un fieldset */}
-      <FilterFieldset>
-        <Legend>État des tâches</Legend>
-        <FilterButton
-          active={filter === "all"}
-          onClick={() => setFilter("all")}
-          aria-pressed={filter === "all"}
-          type="button"
-        >
-          Tous
-        </FilterButton>
-        <FilterButton
-          active={filter === "active"}
-          onClick={() => setFilter("active")}
-          aria-pressed={filter === "active"}
-          type="button"
-        >
-          Actifs
-        </FilterButton>
-        <FilterButton
-          active={filter === "completed"}
-          onClick={() => setFilter("completed")}
-          aria-pressed={filter === "completed"}
-          type="button"
-        >
-          Terminés
-        </FilterButton>
-      </FilterFieldset>
-
-      {/* Filtre par catégorie */}
-      <div>
-        <Label htmlFor="category">Catégorie :</Label>
-        <Select
-          id="category"
-          value={categoryFilter}
-          onChange={(e) =>
-            setCategoryFilter(e.target.value as Category | "all")
-          }
-        >
-          <option value="all">Toutes</option>
-          <option value="travail">Travail</option>
-          <option value="personnel">Personnel</option>
-          <option value="voyages">Voyages</option>
-        </Select>
-      </div>
+      <FilterGroup aria-labelledby="status-filter-title">
+        <Title id="status-filter-title">État</Title>
+        <RadioGroup role="radiogroup" aria-label="Filtrer par état des tâches">
+          {[
+            { value: "all", label: "Tous" },
+            { value: "active", label: "En cours" },
+            { value: "completed", label: "Terminés" },
+          ].map(({ value, label }) => {
+            const checked = statusFilter === value;
+            return (
+              <RadioLabel key={value} checked={checked}>
+                <HiddenRadio
+                  name="statusFilter"
+                  value={value}
+                  checked={checked}
+                  onChange={() =>
+                    setStatusFilter(value as "all" | "active" | "completed")
+                  }
+                />
+                <StyledRadio checked={checked} />
+                {label}
+              </RadioLabel>
+            );
+          })}
+        </RadioGroup>
+      </FilterGroup>
     </ControlsContainer>
   );
 }

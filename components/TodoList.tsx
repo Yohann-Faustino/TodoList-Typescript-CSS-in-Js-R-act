@@ -28,7 +28,6 @@ type TodoListProps = {
 
 // Conteneur principal avec une bordure
 const TodoListContainer = styled.div`
-  margin-top: 20px;
   padding: 12px;
   border: 2px solid #2600ff;
   border-radius: 12px;

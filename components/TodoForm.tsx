@@ -55,6 +55,11 @@ const AddButton = styled.button`
   }
 `;
 
+// Titre du bloc ajout de tâches
+const Title = styled.h2`
+  color: #2600ff; /* Bleu */
+  margin-bottom: 15px;
+`;
 interface TodoFormProps {
   addTodo: (text: string, dueDate?: string, category?: Category) => void;
 }
@@ -87,6 +92,7 @@ export default function TodoForm({ addTodo }: TodoFormProps) {
         handleAddTodo();
       }}
     >
+      <Title>Ajout de tâches :</Title>
       <TextInput
         type="text"
         placeholder="Nouvelle tâche"
