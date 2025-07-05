@@ -10,23 +10,23 @@ import {
   DropResult,
 } from "@hello-pangea/dnd";
 
-// Props attendues par le composant TodoList
+// Types des props
 type TodoListProps = {
-  todos: Todo[]; // Liste des tâches à afficher (filtrée ou complète)
+  todos: Todo[];
   editingId: number | null;
-  setEditingId: (id: number | null) => void; // Fonction pour définir la tâche en cours d'édition
+  setEditingId: (id: number | null) => void;
   saveEditedTodo: (
     id: number,
     text: string,
     dueDate?: string,
     category?: Category
-  ) => void; // Fonction pour sauvegarder une tâche modifiée
-  toggleTodo: (id: number) => void; // Fonction pour marquer une tâche comme terminée ou non
-  deleteTodo: (id: number) => void; // Fonction pour supprimer une tâche
-  setTodos: React.Dispatch<React.SetStateAction<Todo[]>>; // Fonction pour mettre à jour l'état des todos, accepte un nouveau tableau ou une fonction de mise à jour basée sur l'état précédent
+  ) => void;
+  toggleTodo: (id: number) => void;
+  deleteTodo: (id: number) => void;
+  setTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
 };
 
-// Conteneur principal avec une bordure
+// Conteneur principal
 const TodoListContainer = styled.div`
   padding: 12px;
   border: 2px solid #2600ff;
@@ -34,18 +34,21 @@ const TodoListContainer = styled.div`
   background-color: #f9faff;
 `;
 
-// Liste sans puces
+// UL obligatoire pour respecter la logique verticale de react-beautiful-dnd
 const StyledUl = styled.ul`
   list-style: none;
   padding: 0;
   margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
 `;
 
-// Container de la liste des tâches
-const ListContainer = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 0;
+// Chaque tâche occupe un espace flexible
+const FlexItem = styled.div`
+  width: calc(33.33% - 16px);
+  min-width: 280px;
+  flex: 1 0 280px;
 `;
 
 // Affichage et gestion des tâches via drag&drop
@@ -70,38 +73,43 @@ export default function TodoList({
   };
 
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <Droppable droppableId="todo-list">
-        {(provided) => (
-          <ListContainer ref={provided.innerRef} {...provided.droppableProps}>
-            {todos.map((todo, index) => (
-              <Draggable
-                key={todo.id}
-                draggableId={String(todo.id)}
-                index={index}
-              >
-                {(provided) => (
-                  <li
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                  >
-                    <TodoItem
-                      todo={todo}
-                      isEditing={editingId === todo.id}
-                      setEditingId={setEditingId}
-                      saveEditedTodo={saveEditedTodo}
-                      toggleTodo={toggleTodo}
-                      deleteTodo={deleteTodo}
-                    />
-                  </li>
-                )}
-              </Draggable>
-            ))}
-            {provided.placeholder}
-          </ListContainer>
-        )}
-      </Droppable>
-    </DragDropContext>
+    <TodoListContainer>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        {/*⚠️ direction="horizontal"sinon les taches qu'on ne touchent pas forment un bloc et on pourra mettre la tâche saisie que en 1ere ou dernière position */}
+        <Droppable droppableId="todo-list" direction="horizontal">
+          {(provided) => (
+            <StyledUl ref={provided.innerRef} {...provided.droppableProps}>
+              {todos.map((todo, index) => (
+                <Draggable
+                  key={todo.id}
+                  draggableId={String(todo.id)}
+                  index={index}
+                >
+                  {(provided) => (
+                    <li
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                    >
+                      <FlexItem>
+                        <TodoItem
+                          todo={todo}
+                          isEditing={editingId === todo.id}
+                          setEditingId={setEditingId}
+                          saveEditedTodo={saveEditedTodo}
+                          toggleTodo={toggleTodo}
+                          deleteTodo={deleteTodo}
+                        />
+                      </FlexItem>
+                    </li>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </StyledUl>
+          )}
+        </Droppable>
+      </DragDropContext>
+    </TodoListContainer>
   );
 }
